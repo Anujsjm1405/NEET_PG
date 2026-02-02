@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet"> -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            min-height: 100vh;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 25px 40px;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 35px 25px;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            border: 1px solid rgba(255,255,255,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.08), transparent);
+            transform: rotate(25deg);
+            top: -60%;
+            left: -60%;
+            transition: 0.5s;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .desc {
+            font-size: 14px;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+            opacity: 0.6;
+        }
+
+        @media(max-width: 600px) {
+            header {
+                font-size: 20px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    📊 Student Performance Dashboard
+</header>
+
+<div class="container">
+    <div class="grid">
+
+        <div class="card" onclick="openPage('GT.html')">
+            <div class="icon">📝</div>
+            <div class="title">Test Score Tracker</div>
+            <div class="desc">Monitor your test results, analyze performance trends, and improve weak areas.</div>
+        </div>
+
+        <div class="card" onclick="openPage('subject.html')">
+            <div class="icon">📚</div>
+            <div class="title">Subject Progress</div>
+            <div class="desc">Track completion status and progress for each subject in your curriculum.</div>
+        </div>
+
+        <div class="card" onclick="openPage('time.html')">
+            <div class="icon">⏳</div>
+            <div class="title">Time Tracking</div>
+            <div class="desc">Analyze how much time you spend studying and optimize your productivity.</div>
+        </div>
+
+    </div>
+</div>
+
+<footer>
+    Built for productivity • Stay consistent 🚀
+</footer>
+
+<script>
+    function openPage(page) {
+        window.location.href = page;
+    }
+</script>
+
+</body>
+</html>

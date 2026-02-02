@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NEET-PG Subject Tracker</title>
+
+<style>
+:root{
+  --bg:#020617;
+  --card:#0f172a;
+  --glass:rgba(255,255,255,0.06);
+  --border:rgba(255,255,255,0.08);
+  --text:#e5e7eb;
+  --muted:#94a3b8;
+
+  --green:#22c55e;
+  --yellow:#eab308;
+  --red:#ef4444;
+}
+
+body.light{
+  --bg:#f1f5f9;
+  --card:#ffffff;
+  --glass:rgba(0,0,0,0.04);
+  --border:rgba(0,0,0,0.08);
+  --text:#0f172a;
+  --muted:#475569;
+}
+
+*{ 
+   box-sizing:border-box;
+   font-family: system-ui, -apple-system, sans-serif;
+}
+
+body{
+ margin:0;
+ background:var(--bg);
+ color:var(--text);
+ transition:0.3s;
+}
+
+/* ===== CONTAINER SPACING ===== */
+.container{
+  max-width:1000px;
+  margin:auto;
+  padding:32px 24px;
+}
+
+/* ===== HEADINGS ===== */
+h1{
+ text-align:center;
+ margin-bottom:28px;
+}
+
+/* ===== THEME BUTTON ===== */
+.theme-toggle{
+ display:flex;
+ justify-content:flex-end;
+ margin-bottom:18px;
+}
+
+.toggle-btn{
+ background:var(--glass);
+ border:1px solid var(--border);
+ color:var(--text);
+ padding:10px 16px;
+ border-radius:12px;
+ cursor:pointer;
+}
+
+/* ===== TABS ===== */
+.tabs{
+ display:flex;
+ background:var(--glass);
+ border-radius:18px;
+ padding:6px;
+ border:1px solid var(--border);
+ margin-bottom:28px;
+}
+
+.tab-btn{
+ flex:1;
+ padding:14px;
+ border:none;
+ border-radius:14px;
+ background:transparent;
+ color:var(--muted);
+ font-weight:600;
+ cursor:pointer;
+}
+
+.tab-btn.active{
+ background:#2563eb;
+ color:white;
+}
+
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* ===== CARDS ===== */
+.card{
+ background:var(--card);
+ border-radius:20px;
+ padding:26px;
+ border:1px solid var(--border);
+ margin-bottom:24px;
+ transition:0.3s ease;
+ box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+
+.card-status-green{ background:rgba(34,197,94,0.18); border:1px solid rgba(34,197,94,0.45); }
+.card-status-yellow{ background:rgba(234,179,8,0.18); border:1px solid rgba(234,179,8,0.45); }
+.card-status-red{ background:rgba(239,68,68,0.18); border:1px solid rgba(239,68,68,0.45); }
+
+/* ===== ROWS ===== */
+.row{
+ display:flex;
+ gap:16px;
+ flex-wrap:wrap;
+ margin-bottom:16px;
+}
+
+/* ===== INPUTS ===== */
+select,input{
+ flex:1;
+ padding:14px;
+ border-radius:12px;
+ border:1px solid var(--border);
+ background:var(--bg);
+ color:var(--text);
+ margin-top:4px;
+}
+
+/* ===== BUTTONS ===== */
+button{
+ padding:12px 16px;
+ border-radius:10px;
+ border:none;
+ cursor:pointer;
+ font-weight:600;
+ min-height:44px;
+}
+
+.btn-not{ background:var(--red); color:white; }
+.btn-study{ background:var(--yellow); color:white; }
+.btn-done{ background:var(--green); color:white; }
+.btn-primary{ background:#2563eb; color:white; }
+
+/* ===== CHAPTER ===== */
+.chapter{
+ margin-top:18px;
+ padding:18px;
+ border-radius:16px;
+ border:1px solid transparent;
+ box-shadow:0 6px 16px rgba(0,0,0,0.12);
+}
+
+.chapter.not_started{ background:rgba(239,68,68,0.18); border:1px solid rgba(239,68,68,0.45); }
+.chapter.studying{ background:rgba(234,179,8,0.18); border:1px solid rgba(234,179,8,0.45); }
+.chapter.completed{ background:rgba(34,197,94,0.18); border:1px solid rgba(34,197,94,0.45); }
+
+.chapter-header{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:10px;
+}
+
+/* ===== CATEGORY ===== */
+.category-subject{
+ margin-bottom:18px;
+ padding:20px;
+ border-radius:14px;
+ border:1px solid transparent;
+ box-shadow:0 6px 16px rgba(0,0,0,0.12);
+}
+
+.category-subject.red{ background:rgba(239,68,68,0.18); border:1px solid rgba(239,68,68,0.45); }
+.category-subject.yellow{ background:rgba(234,179,8,0.18); border:1px solid rgba(234,179,8,0.45); }
+.category-subject.green{ background:rgba(34,197,94,0.18); border:1px solid rgba(34,197,94,0.45); }
+
+/* ===== PROGRESS ===== */
+.progress-bar{
+ width:100%;
+ height:12px;
+ border-radius:999px;
+ background:var(--bg);
+ overflow:hidden;
+ margin-top:12px;
+}
+
+.progress-inner{ height:100%; }
+.progress-green{ background:var(--green); }
+.progress-yellow{ background:var(--yellow); }
+.progress-red{ background:var(--red); }
+
+.small-text{ font-size:13px; color:var(--muted); margin-top:8px; }
+.incomplete-list{ margin-top:10px; font-size:13px; }
+
+/* ===== MOBILE ===== */
+@media(max-width:700px){
+ .tabs{flex-direction:column}
+ .row{flex-direction:column}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<div class="theme-toggle">
+<button id="themeBtn" class="toggle-btn" onclick="toggleTheme()">Dark Mode</button>
+</div>
+
+<h1>Subject Tracker</h1>
+
+<div class="tabs">
+<button class="tab-btn active" onclick="openTab('trackerTab',this)">Tracker</button>
+<button class="tab-btn" onclick="openTab('categoryTab',this)">Rank Categories</button>
+</div>
+
+<div id="trackerTab" class="tab-content active">
+
+<div id="topCard" class="card">
+<div class="row">
+<select id="subjectDropdown" onchange="changeSubject()"></select>
+</div>
+
+<div class="row">
+<input id="chapterInput" placeholder="Add Chapter" />
+<button class="btn-primary" onclick="addChapter()">Add</button>
+</div>
+
+<div id="progressSection"></div>
+</div>
+
+<div id="chapterContainer"></div>
+
+</div>
+
+<div id="categoryTab" class="tab-content">
+
+<div class="card">
+<div class="row">
+<select id="categorySubjectDropdown"></select>
+<select id="categoryType">
+<option value="rank_building">Rank Building</option>
+<option value="rank_maintaining">Rank Maintaining</option>
+<option value="rank_deciding">Rank Deciding</option>
+</select>
+<button class="btn-primary" onclick="addCategorySubject()">Add</button>
+</div>
+</div>
+
+<div>
+<h3>Rank Building</h3>
+<div id="rank_building_list"></div>
+
+<h3>Rank Maintaining</h3>
+<div id="rank_maintaining_list"></div>
+
+<h3>Rank Deciding</h3>
+<div id="rank_deciding_list"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+// (Your original JS unchanged)
+
+function updateThemeButton(){
+ const btn=document.getElementById('themeBtn');
+ btn.textContent=document.body.classList.contains('light')?'Light Mode':'Dark Mode';
+}
+
+function toggleTheme(){
+ document.body.classList.toggle('light');
+ localStorage.setItem('neet_theme',document.body.classList.contains('light')?'light':'dark');
+ updateThemeButton();
+}
+
+(function loadTheme(){
+ if(localStorage.getItem('neet_theme')==='light') document.body.classList.add('light');
+ setTimeout(updateThemeButton,0);
+})();
+
+const SUBJECT_LIST=["Anatomy","Physiology","Biochemistry","Pathology","Pharmacology","Microbiology","Forensic Medicine","Community Medicine (PSM)","General Medicine","General Surgery","Obstetrics and Gynecology","Pediatrics","ENT","Ophthalmology","Orthopedics","Dermatology","Psychiatry","Anesthesia","Radiology"];
+
+let data=JSON.parse(localStorage.getItem('neet_pg_subject_chapters'))||{};
+let categories=JSON.parse(localStorage.getItem('neet_pg_categories'))||{rank_building:[],rank_maintaining:[],rank_deciding:[]};
+
+SUBJECT_LIST.forEach(s=>{if(!data[s])data[s]=[]});
+
+function saveData(){localStorage.setItem('neet_pg_subject_chapters',JSON.stringify(data));}
+function saveCategories(){localStorage.setItem('neet_pg_categories',JSON.stringify(categories));}
+
+function openTab(id,btn){
+ document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ btn.classList.add('active');
+}
+
+function loadDropdowns(){
+ document.getElementById('subjectDropdown').innerHTML=SUBJECT_LIST.map(s=>`<option>${s}</option>`).join('');
+ document.getElementById('categorySubjectDropdown').innerHTML=SUBJECT_LIST.map(s=>`<option>${s}</option>`).join('');
+}
+
+function getSelectedSubject(){return document.getElementById('subjectDropdown').value;}
+function changeSubject(){renderAll();}
+
+function addChapter(){
+ let s=getSelectedSubject();
+ let name=document.getElementById('chapterInput').value.trim();
+ if(!name)return;
+ data[s].push({id:Date.now(),name,status:'not_started',percent:0});
+ document.getElementById('chapterInput').value='';
+ saveData();renderAll();
+}
+
+function setStatus(subject,id,status){
+ let c=data[subject].find(x=>x.id===id);
+ if(!c)return;
+ c.status=status;
+ if(status==='not_started')c.percent=0;
+ if(status==='completed')c.percent=100;
+ saveData();renderAll();
+}
+
+function updatePercent(subject,id,val){
+ let c=data[subject].find(x=>x.id===id);
+ if(!c)return;
+ let v=Math.max(0,Math.min(100,Number(val)||0));
+ c.percent=v;
+ if(v===100)c.status='completed';
+ else if(v>0)c.status='studying';
+ else c.status='not_started';
+ saveData();renderAll();
+}
+
+function getSubjectStats(subject){
+ let ch = data[subject] || [];
+ let total = ch.length;
+ let completed = ch.filter(x=>x.status==='completed').length;
+ let incompleteList = ch.filter(x=>x.status!=='completed').map(x=>x.name);
+ return { total, completed, incompleteList };
+}
+
+function getSubjectOverallStatus(subject){
+ let ch=data[subject]||[];
+ if(!ch.length) return 'red';
+ let total=ch.length;
+ let completed=ch.filter(x=>x.status==='completed').length;
+ let studying=ch.filter(x=>x.status==='studying').length;
+ if(completed===total) return 'green';
+ if(studying>0 || completed>0) return 'yellow';
+ return 'red';
+}
+
+function applyCardStatusColor(subject){
+ let card=document.getElementById('topCard');
+ card.classList.remove('card-status-green','card-status-yellow','card-status-red');
+ card.classList.add('card-status-'+getSubjectOverallStatus(subject));
+}
+
+function renderProgress(subject){
+ let s=getSubjectOverallStatus(subject);
+ if(s==='green') return "Subject Completed";
+ if(s==='red') return "Not Started";
+ return "In Progress";
+}
+
+function renderChapters(subject){
+ let container=document.getElementById('chapterContainer');
+ container.innerHTML=data[subject].map(ch=>{
+  let width=ch.status==='completed'?100:ch.status==='studying'?ch.percent:100;
+  let pcolor=ch.status==='completed'?'progress-green':ch.status==='studying'?'progress-yellow':'progress-red';
+  return `<div class='chapter ${ch.status}'>
+  <div class='chapter-header'>
+  <div>${ch.name}</div>
+  <div style='display:flex; gap:6px;'>
+  <button class='btn-not' onclick="setStatus('${subject}',${ch.id},'not_started')">Not Started</button>
+  <button class='btn-study' onclick="setStatus('${subject}',${ch.id},'studying')">Studying</button>
+  <button class='btn-done' onclick="setStatus('${subject}',${ch.id},'completed')">Completed</button>
+  </div>
+  </div>
+  ${ch.status==='studying'?`<input type='number' min='0' max='100' value='${ch.percent}' onchange="updatePercent('${subject}',${ch.id},this.value)">`:''}
+  <div class='progress-bar'><div class='progress-inner ${pcolor}' style='width:${width}%'></div></div>
+  </div>`;
+ }).join('');
+}
+
+function renderCategorySubject(subject){
+ let stats = getSubjectStats(subject);
+ let status = getSubjectOverallStatus(subject);
+
+ let percent = 0;
+ if(stats.total > 0){
+   percent = Math.round((stats.completed / stats.total) * 100);
+ }
+
+ let barClass = 'progress-red';
+ if(percent === 100) barClass = 'progress-green';
+ else if(percent > 0) barClass = 'progress-yellow';
+
+ let incompleteHTML = '';
+ if(stats.incompleteList.length > 0){
+   incompleteHTML = `<div class='incomplete-list'>Incomplete Chapters: ${stats.incompleteList.join(', ')}</div>`;
+ }
+
+ return `
+ <div class='category-subject ${status}'>
+   <b>${subject}</b>
+   <div class='small-text'>Completed: ${stats.completed} / ${stats.total} (${percent}%)</div>
+   ${incompleteHTML}
+   <div class='progress-bar'>
+     <div class='progress-inner ${barClass}' style='width:${percent}%'></div>
+   </div>
+ </div>`;
+}
+
+function addCategorySubject(){
+ let sub=document.getElementById('categorySubjectDropdown').value;
+ let type=document.getElementById('categoryType').value;
+ if(!categories[type].includes(sub)) categories[type].push(sub);
+ saveCategories();renderCategories();
+}
+
+function renderCategories(){
+ Object.keys(categories).forEach(type=>{
+  document.getElementById(type+'_list').innerHTML=categories[type].map(s=>renderCategorySubject(s)).join('');
+ });
+}
+
+function renderAll(){
+ let s=getSelectedSubject();
+ applyCardStatusColor(s);
+ document.getElementById('progressSection').innerHTML=renderProgress(s);
+ renderChapters(s);
+ renderCategories();
+}
+
+loadDropdowns();
+renderAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="manifest" href="manifest.json">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="MedTracker">
+
+<title>Medical Exam Tracker V5</title>
+
+<script src="./chart.umd.min.js"></script>
+
+<style>
+
+/* ===== THEME VARIABLES ===== */
+:root{
+ --bg1:#eef2ff;
+ --bg2:#f8fafc;
+ --bg3:#e0f2fe;
+ --card:rgba(255,255,255,0.75);
+ --text:#1e293b;
+ --table:#f1f5f9;
+}
+
+body.dark{
+ --bg1:#0f172a;
+ --bg2:#020617;
+ --bg3:#020617;
+ --card:rgba(15,23,42,0.75);
+ --text:#e2e8f0;
+ --table:#1e293b;
+}
+
+*{box-sizing:border-box;
+font-family: system-ui, -apple-system, sans-serif;
+}
+
+body{
+ margin:0;
+ font-family:Inter,system-ui;
+ background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+ color:var(--text);
+ transition:all 0.3s ease;
+}
+
+/* ===== CONTAINER ===== */
+.container{
+ max-width:1200px;
+ margin:30px auto;
+ padding:25px;
+ border-radius:22px;
+ background:var(--card);
+ backdrop-filter: blur(14px);
+ box-shadow:0 10px 40px rgba(0,0,0,0.12);
+}
+
+/* ===== HEADER ===== */
+.header{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin-bottom:20px;
+}
+
+h1{margin:0;font-weight:800;}
+
+/* ===== THEME DISPLAY ===== */
+.theme-indicator{
+ padding:8px 16px;
+ border-radius:999px;
+ font-weight:600;
+ cursor:pointer;
+ background:rgba(99,102,241,0.15);
+ color:#6366f1;
+ transition:0.2s;
+}
+
+.theme-indicator:hover{
+ transform:scale(1.05);
+}
+
+body.dark .theme-indicator{
+ background:rgba(99,102,241,0.25);
+ color:#a5b4fc;
+}
+
+/* ===== FORM ===== */
+.input-form{
+ background:var(--card);
+ border-radius:18px;
+ padding:20px;
+ display:flex;
+ flex-wrap:wrap;
+ gap:16px;
+}
+
+.input-group{
+ display:flex;
+ flex-direction:column;
+ flex:1;
+ min-width:120px;
+}
+
+.input-group label{
+ font-size:0.8rem;
+ font-weight:600;
+ margin-bottom:6px;
+}
+
+input,select{
+ border-radius:12px;
+ border:1px solid #ccc;
+ padding:12px;
+ font-size:15px;
+}
+
+.btn-group{
+ display:flex;
+ width:100%;
+ gap:12px;
+}
+
+button{
+ border:none;
+ padding:14px;
+ border-radius:14px;
+ font-weight:700;
+ cursor:pointer;
+}
+
+#add-button{background:#6366f1;color:white;}
+#undo-button{background:#f59e0b;color:white;}
+#export-button{background:#10b981;color:white;}
+
+#chart-container{
+ margin-top:25px;
+ height:420px;
+ background:var(--card);
+ border-radius:18px;
+ padding:15px;
+}
+
+.table-wrapper{
+ margin-top:20px;
+ overflow-x:auto;
+ border-radius:18px;
+ background:var(--card);
+}
+
+thead{background:var(--table);}
+th,td{padding:14px;text-align:center;}
+
+.high-score{color:#22c55e;font-weight:700;}
+.med-score{color:#f59e0b;font-weight:700;}
+.low-score{color:#ef4444;font-weight:700;}
+
+.net-score-col{font-weight:800;color:#6366f1;}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+<h1>🛣️ Road To 165+</h1>
+
+<div class="theme-indicator" onclick="toggleTheme()">
+Theme: <span id="themeText">Light</span>
+</div>
+
+</div>
+
+<!-- FORM -->
+<div class="input-form">
+
+<div class="input-group" style="min-width:100%">
+<label>Platform</label>
+<select id="platformSelect" onchange="handlePlatformChange()">
+<option>DAMS</option>
+<option>MARROW</option>
+<option>CEREBELLUM</option>
+</select>
+</div>
+
+<div class="input-group">
+<label>Test</label>
+<input id="testNameInput">
+</div>
+
+<div class="input-group">
+<label>Total</label>
+<input id="totalQInput" type="number" value="200">
+</div>
+
+<div class="input-group">
+<label>Correct</label>
+<input id="correctCountInput" type="number">
+</div>
+
+<div class="input-group">
+<label>Wrong</label>
+<input id="wrongCountInput" type="number">
+</div>
+
+<div class="input-group">
+<label>Left</label>
+<input id="leftCountInput" type="number">
+</div>
+
+<div class="btn-group">
+<button id="add-button" onclick="addData()">Add</button>
+<button id="undo-button" onclick="undoLastEntry()">Undo</button>
+</div>
+
+<div class="btn-group">
+<button id="export-button" onclick="exportToCSV()">Save CSV</button>
+</div>
+
+</div>
+
+<h2>📈 Progress</h2>
+<div id="chart-container">
+<canvas id="scoreLineChart"></canvas>
+</div>
+
+<h2>📋 History (<span id="tablePlatformTitle">DAMS</span>)</h2>
+
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>C/W/L</th>
+<th>Accuracy</th>
+<th>Score</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+
+/* ===== THEME LOGIC ===== */
+function updateThemeText(){
+ const themeText=document.getElementById("themeText");
+ themeText.innerText=document.body.classList.contains("dark")
+  ? "Dark"
+  : "Light";
+}
+
+function toggleTheme(){
+ document.body.classList.toggle("dark");
+
+ const theme=document.body.classList.contains("dark")
+  ? "dark"
+  : "light";
+
+ localStorage.setItem("theme",theme);
+ updateThemeText();
+}
+
+(function(){
+ const saved=localStorage.getItem("theme");
+ if(saved==="dark") document.body.classList.add("dark");
+ updateThemeText();
+})();
+
+/* ===== STORAGE ===== */
+const STORAGE_KEY='medTracker_v5_full';
+
+function loadData(){
+ const json=localStorage.getItem(STORAGE_KEY);
+ const structure={labels:[],total:[],correct:[],wrong:[],left:[],scores:[],accuracy:[]};
+ if(json) return JSON.parse(json);
+ return {DAMS:structuredClone(structure),MARROW:structuredClone(structure),CEREBELLUM:structuredClone(structure)};
+}
+
+let allData=loadData();
+
+/* ===== CHART ===== */
+const ctx=document.getElementById('scoreLineChart');
+
+const scoreChart=new Chart(ctx,{
+ type:'line',
+ data:{
+ labels:[],
+ datasets:[
+ {label:'Correct',data:[],borderColor:'#22c55e'},
+ {label:'Wrong',data:[],borderColor:'#ef4444'},
+ {label:'Left',data:[],borderColor:'#3b82f6'},
+ {label:'Score',data:[],borderColor:'#6366f1',borderDash:[5,5],hidden:true}
+ ]},
+ options:{responsive:true,maintainAspectRatio:false}
+});
+
+/* ===== MAIN FUNCTIONS ===== */
+function handlePlatformChange(){
+ const platform=platformSelect.value;
+ const d=allData[platform];
+ tablePlatformTitle.innerText=platform;
+ tableBody.innerHTML='';
+
+ d.labels.forEach((l,i)=>{
+ const acc=parseFloat(d.accuracy[i]);
+ const accClass=acc>=70?'high-score':acc>=50?'med-score':'low-score';
+
+ tableBody.innerHTML+=`
+ <tr>
+ <td>${l}</td>
+ <td>${d.correct[i]} / ${d.wrong[i]} / ${d.left[i]}</td>
+ <td class="${accClass}">${d.accuracy[i]}%</td>
+ <td class="net-score-col">${d.scores[i]}</td>
+ </tr>`;
+ });
+
+ scoreChart.data.labels=d.labels;
+ scoreChart.data.datasets[0].data=d.correct;
+ scoreChart.data.datasets[1].data=d.wrong;
+ scoreChart.data.datasets[2].data=d.left;
+ scoreChart.data.datasets[3].data=d.scores;
+ scoreChart.update();
+}
+
+function addData(){
+ const platform=platformSelect.value;
+ const name=testNameInput.value;
+ const total=+totalQInput.value;
+ const correct=+correctCountInput.value;
+ const wrong=+wrongCountInput.value;
+ const left=+leftCountInput.value;
+
+ if(!name||isNaN(total)||isNaN(correct)||isNaN(wrong)||isNaN(left)){
+ alert("Fill all fields");return;
+ }
+
+ if(correct+wrong+left!==total){
+ alert("Counts mismatch");return;
+ }
+
+ const score=(correct*4)-wrong;
+ const attempted=correct+wrong;
+ const accuracy=attempted?((correct/attempted)*100).toFixed(1):0;
+
+ const d=allData[platform];
+
+ d.labels.push(name);
+ d.total.push(total);
+ d.correct.push(correct);
+ d.wrong.push(wrong);
+ d.left.push(left);
+ d.scores.push(score);
+ d.accuracy.push(accuracy);
+
+ localStorage.setItem(STORAGE_KEY,JSON.stringify(allData));
+
+ testNameInput.value='';
+ correctCountInput.value='';
+ wrongCountInput.value='';
+ leftCountInput.value='';
+
+ handlePlatformChange();
+}
+
+function undoLastEntry(){
+ const d=allData[platformSelect.value];
+ if(d.labels.length){
+ Object.keys(d).forEach(k=>d[k].pop());
+ localStorage.setItem(STORAGE_KEY,JSON.stringify(allData));
+ handlePlatformChange();
+ }
+}
+
+function exportToCSV(){
+ const d=allData[platformSelect.value];
+ let csv="Test,Total,Correct,Wrong,Left,Score,Accuracy\n";
+ d.labels.forEach((l,i)=>{
+ csv+=`${l},${d.total[i]},${d.correct[i]},${d.wrong[i]},${d.left[i]},${d.scores[i]},${d.accuracy[i]}\n`;
+ });
+
+ const blob=new Blob([csv]);
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);
+ a.download="scores.csv";
+ a.click();
+}
+
+window.onload=handlePlatformChange;
+
+</script>
+
+</body>
+</html>

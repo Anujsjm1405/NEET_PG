@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>NEET PG Study Tracker</title>
+
+<script src="./chart.umd.min.js"></script>
+
+<style>
+
+/* ===== GLOBAL ===== */
+*{
+ margin:0;
+ padding:0;
+ box-sizing:border-box;
+ font-family: system-ui, -apple-system, sans-serif;
+}
+
+body{
+ background: linear-gradient(135deg,#0f172a,#1e293b);
+ min-height:100vh;
+ color:white;
+ display:flex;
+ flex-direction:column;
+ transition:0.3s;
+}
+
+/* ===== LIGHT THEME ===== */
+body.light{
+ background: linear-gradient(135deg,#eef2ff,#f8fafc,#e0f2fe);
+ color:#0f172a;
+}
+
+body.light header{ color:#0f172a; }
+
+body.light .card{
+ background: rgba(255,255,255,0.85);
+ border:1px solid rgba(0,0,0,0.08);
+ box-shadow:0 10px 30px rgba(0,0,0,0.1);
+}
+
+body.light input{
+ background:#ffffff;
+ color:#0f172a;
+ border:1px solid rgba(0,0,0,0.1);
+}
+
+body.light .tab-btn{
+ background: rgba(0,0,0,0.05);
+ color:#0f172a;
+ border:1px solid rgba(0,0,0,0.1);
+}
+
+body.light .tab-btn.active{
+ background:#6366f1;
+ color:white;
+}
+
+body.light .theme-btn{
+ background: rgba(0,0,0,0.05);
+ border:1px solid rgba(0,0,0,0.15);
+ color:#0f172a;
+}
+
+/* ===== HEADER ===== */
+header{
+ padding:28px 40px;
+ font-size:24px;
+ font-weight:600;
+ letter-spacing:1px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+}
+
+.theme-btn{
+ background: rgba(255,255,255,0.08);
+ border:1px solid rgba(255,255,255,0.2);
+ color:white;
+ padding:10px 18px;
+ border-radius:999px;
+ cursor:pointer;
+ font-size:13px;
+ min-height:44px;
+}
+
+/* ===== CONTAINER ===== */
+.container{
+ flex:1;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ padding:48px 24px;
+}
+
+.grid{
+ display:grid;
+ grid-template-columns: repeat(auto-fit,minmax(320px,1fr));
+ gap:32px;
+ width:100%;
+ max-width:1100px;
+}
+
+/* ===== CARD ===== */
+.card{
+ background: rgba(255,255,255,0.05);
+ backdrop-filter: blur(12px);
+ border-radius:22px;
+ padding:30px;
+ border:1px solid rgba(255,255,255,0.08);
+ transition:.35s ease;
+ box-shadow:0 10px 30px rgba(0,0,0,0.35);
+}
+
+.card:hover{
+ transform: translateY(-6px);
+ box-shadow:0 20px 45px rgba(0,0,0,0.45);
+}
+
+/* ===== TEXT ===== */
+h3{ margin-bottom:18px; }
+
+/* ===== INPUT ===== */
+label{
+ font-size:13px;
+ opacity:.8;
+ margin-top:16px;
+ display:block;
+}
+
+input{
+ width:100%;
+ margin-top:8px;
+ padding:14px;
+ border-radius:14px;
+ border:1px solid rgba(255,255,255,0.12);
+ background: rgba(255,255,255,0.05);
+ color:white;
+}
+
+/* ===== BUTTON ===== */
+.primary-btn{
+ margin-top:22px;
+ width:100%;
+ padding:16px;
+ border:none;
+ border-radius:16px;
+ background: linear-gradient(135deg,#6366f1,#4f46e5);
+ color:white;
+ font-weight:600;
+ cursor:pointer;
+ min-height:48px;
+}
+
+/* ===== TABS ===== */
+.tabs{
+ display:flex;
+ gap:14px;
+ margin-bottom:28px;
+}
+
+.tab-btn{
+ flex:1;
+ padding:14px;
+ border-radius:16px;
+ border:1px solid rgba(255,255,255,0.12);
+ background: rgba(255,255,255,0.05);
+ color:white;
+ cursor:pointer;
+ min-height:44px;
+}
+
+.tab-btn.active{ background:#6366f1; }
+
+.tab-content{ display:none; }
+.tab-content.active{ display:block; }
+
+/* ===== CANVAS ===== */
+canvas{
+ margin-top:24px;
+ width:100% !important;
+}
+
+/* ===== FOOTER ===== */
+footer{
+ text-align:center;
+ padding:18px;
+ font-size:14px;
+ opacity:.6;
+}
+
+@media(max-width:700px){
+ header{ padding:22px; font-size:20px; }
+ .container{ padding:32px 16px; }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+ 📊 NEET PG Time Tracker
+ <button id="themeBtn" class="theme-btn" onclick="toggleTheme()">Theme</button>
+</header>
+
+<div class="container">
+<div style="width:100%; max-width:1100px;">
+
+<div class="tabs">
+ <button class="tab-btn active" onclick="switchTab('dailyTab', this)">Daily Tracking</button>
+ <button class="tab-btn" onclick="switchTab('monthlyTab', this)">Monthly Analytics</button>
+</div>
+
+<div id="dailyTab" class="tab-content active">
+<div class="grid">
+
+<div class="card">
+<h3>Daily Study Entry</h3>
+
+<label>Date</label>
+<input type="date" id="studyDate" />
+
+<label>Video</label>
+<input type="number" id="video" min="0" max="24" />
+
+<label>MCQ</label>
+<input type="number" id="mcq" min="0" max="24" />
+
+<label>Self Study</label>
+<input type="number" id="selfStudy" min="0" max="24" />
+
+<label>Break</label>
+<input type="number" id="break" min="0" max="24" />
+
+<label>Chores</label>
+<input type="number" id="chores" min="0" max="24" />
+
+<label>Sleep</label>
+<input type="number" id="sleep" min="0" max="24" />
+
+<button class="primary-btn" onclick="generateCharts()">Generate Charts</button>
+</div>
+
+<div class="card">
+<h3>Daily Analytics</h3>
+<canvas id="pieChart"></canvas>
+<canvas id="barChart"></canvas>
+</div>
+
+</div>
+</div>
+
+<div id="monthlyTab" class="tab-content">
+<div class="card">
+<h3>Monthly Study Histogram</h3>
+<button class="primary-btn" onclick="generateMonthlyHistogram()">Generate Histogram</button>
+<canvas id="monthlyChart"></canvas>
+</div>
+</div>
+
+</div>
+</div>
+
+<footer>
+Built for NEET PG Consistency • Stay Disciplined 🚀
+</footer>
+
+<script>
+
+/* ===== THEME ===== */
+function toggleTheme(){
+ document.body.classList.toggle('light');
+
+ localStorage.setItem(
+  "neet_theme_mode",
+  document.body.classList.contains("light") ? "light" : "dark"
+ );
+}
+
+(function(){
+ if(localStorage.getItem("neet_theme_mode")==="light"){
+  document.body.classList.add("light");
+ }
+})();
+
+/* ===== TABS ===== */
+function switchTab(tabId, btn){
+ document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+ document.getElementById(tabId).classList.add('active');
+ btn.classList.add('active');
+}
+
+/* ===== CHART ===== */
+let pieChartInstance=null, barChartInstance=null, monthlyChartInstance=null;
+
+function getValue(id){ return Number(document.getElementById(id).value)||0; }
+
+function getFormValues(){
+ return [
+  getValue('video'), getValue('mcq'), getValue('selfStudy'),
+  getValue('break'), getValue('chores'), getValue('sleep')
+ ];
+}
+
+function generateCharts(){
+ const values=getFormValues();
+
+ if(pieChartInstance) pieChartInstance.destroy();
+ if(barChartInstance) barChartInstance.destroy();
+
+ pieChartInstance=new Chart(document.getElementById('pieChart'),{
+  type:'pie',
+  data:{ labels:['Video','MCQ','Self','Break','Chores','Sleep'], datasets:[{ data:values }] }
+ });
+
+ barChartInstance=new Chart(document.getElementById('barChart'),{
+  type:'bar',
+  data:{ labels:['Video','MCQ','Self'], datasets:[{ label:'No of Hours', data:[values[0],values[1],values[2]] }] }
+ });
+}
+
+function generateMonthlyHistogram(){
+ const monthTotals={};
+
+ for(let i=0;i<localStorage.length;i++){
+  const key=localStorage.key(i);
+  if(!key.startsWith('neet_pg_')) continue;
+
+  const data=JSON.parse(localStorage.getItem(key));
+  const month=data.date.slice(0,7);
+
+  if(!monthTotals[month]) monthTotals[month]=0;
+  monthTotals[month]+=data.values[0]+data.values[1]+data.values[2];
+ }
+
+ const labels=Object.keys(monthTotals).sort();
+ const values=labels.map(m=>monthTotals[m]);
+
+ if(monthlyChartInstance) monthlyChartInstance.destroy();
+
+ monthlyChartInstance=new Chart(document.getElementById('monthlyChart'),{
+  type:'bar',
+  data:{ labels, datasets:[{ label:'No of Hours', data:values }] }
+ });
+}
+
+</script>
+
+</body>
+</html>
